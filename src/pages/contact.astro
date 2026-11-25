@@ -1,0 +1,162 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en-PH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/global.css" />
+    <Astro:head>
+      <title>The Louisian — Contact</title>
+      <meta name="description" content="The official student publication of Saint Louis University BEdS – Senior High Department." />
+      <link rel="canonical" href="https://thelouisian.netlify.app/contact/" />
+    </Astro:head>
+  </body>
+  <class="bg-navy-800 text-paper">
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <header class="border-b --line bg-navy-900/80">
+    <div class="max-w-[1280px] mx-auto px-4 flex items-center justify-between">
+      <h1 class="text-2xl font-playfair">The Louisian</h1>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/about/">About</a>
+        <a href="/board/">Board</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <div class="max-w-[1280px] mx-auto py-8 px-4">
+        <article class="prose lg:prose-lg">
+          <h1 id="main">Contact The Louisian</h1>
+
+          <p class="text-[--muted] text-lg mb-8">
+            Send a tip, a letter to the editor, a correction/privacy request, or join
+            the staff.
+          </p>
+
+          <form
+            action="https://netlify.com/forms/contact"
+            method="POST"
+            class="space-y-4 max-w-md"
+            style="display: flex; flex-direction: column; gap: 12px;"
+          >
+            <input
+              type="hidden"
+              name="formName"
+              value="contact"
+            />
+            <input
+              type="text"
+              name="name"
+              placeholder="Your name (optional)"
+              style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Your email (optional)"
+              style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
+            />
+            <select
+              name="purpose"
+              style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
+            >
+              <option value="tip">Tip</option>
+              <option value="letter">Letter to the Editor</option>
+              <option value="correction">Correction/Privacy Request</option>
+              <option value="join">Join the Staff</option>
+              <option value="other">Other</option>
+            </select>
+            <textarea
+              name="message"
+              rows="4"
+              placeholder="Your message (20–5,000 characters)"
+              style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
+            ></textarea>
+            <div class="flex items-start">
+              <input
+                type="checkbox"
+                name="consent"
+                required
+                style="margin-top: 4px; width: 18px; height: 18px; cursor: pointer;"
+              />
+              <span
+                style="
+                  margin-left: 8px;
+                  cursor: pointer;
+                  text-[--muted];
+                  font-size: 0.875rem;
+                "
+              >
+                I have read the <a href="#privacy" style="color: var(--gold-400);">privacy note</a>
+                below.
+              </span>
+            </div>
+            <button
+              type="submit"
+              style="
+                padding: 10px;
+                background: var(--gold-400);
+                color: var(--navy-800);
+                border: none;
+                border-radius: var(--radius);
+                font-weight: 700;
+              "
+            >
+              Send to The Louisian
+            </button>
+          </form>
+
+          <hr class="my-8 border-t --line" />
+
+          <h2 id="privacy" class="font-playfair text-[--gold-400] mb-3">Privacy note</h2>
+          <div class="prose lg:prose-lg text-[--muted]">
+            <p>
+              What we collect: If you use the contact form, we receive the name and
+              email you choose to provide, plus your message. If you subscribe to the
+              newsletter, Buttondown stores your email. We use Cloudflare Web
+              Analytics for aggregate page counts; it does not use cookies or collect
+              personal data.
+            </p>
+            <p>
+              Who sees it: The editorial board and adviser. We do not publish your
+              contact details or sell them.
+            </p>
+            <p>
+              How long: Form submissions are kept for up to 12 months, then deleted.
+              Newsletter emails stay until you unsubscribe.
+            </p>
+            <p>
+              Removal: Email <a href="mailto:13007796@slu.edu.ph">13007796@slu.edu.ph</a>
+              or use the contact form with "Correction/Privacy Request" to ask for
+              deletion. We respond within 5 school days.
+            </p>
+            <p>
+              Third parties: Netlify (forms and hosting), Buttondown (newsletter),
+              Cloudflare (analytics). HeyZine, YouTube, and Facebook embeds load
+              only after you click them, and their privacy policies apply once
+              loaded.
+            </p>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="border-t --line bg-navy-900 py-8">
+      <div class="max-w-[1280px] mx-auto px-4">
+        <p class="text-[--muted] text-sm">
+          &copy; 2026 The Louisian. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <style>
+      .prose {
+        max-width: 68ch;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Design Tokens
+   ========================================================================== */
+
+/* Color palette */
+:root {
+  --navy-900: #081426;
+  --navy-800: #0F2342;
+  --navy-700: #162B4D;
+  --gold-400: #FBBF24;
+  --gold-500: #F59E0B;
+  --gold-700: #8A6D1F;
+  --blue-200: #BFDBFE;
+  --paper: #FFFDF8;
+  --paper-2: #F5F0E6;
+  --ink: #111827;
+  --muted: #4B5563;
+  --line: #E5E7EB;
+  --success: #166534;
+  --error: #B91C1C;
+}
+
+/* Font families */
+--font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+--font-ui: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+/* Layout */
+--max-width: 1280px;
+--measure: 68ch;
+--gutter: 1.5rem;
+--radius: 6px;
+--shadow: 0 10px 30px rgba(8, 20, 38, 0.08);
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+/* Page */
+html { color-scheme: light; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--navy-800);
+  color: var(--ink);
+  margin: 0;
+}
+
+/* Links */
+a { color: var(--gold-700); text-decoration: underline; }
+a:hover { color: var(--gold-400); }
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* Measure */
+p, div, article { max-width: var(--measure); margin-left: auto; margin-right: auto; }
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-align: center;
+}
+.btn--gold { background: var(--gold-400); color: var(--navy-800); }
+.btn--gold:hover { background: var(--gold-500); }
+.btn--navy { background: var(--navy-800); color: var(--paper); }
+.btn--navy:hover { background: var(--navy-700); }
+
+/* ==========================================================================
+   Print
+   ========================================================================== */
+
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none; }
+}
