@@ -190,6 +190,13 @@ async function generateSite() {
     fs.mkdirSync(DIST_DIR, { recursive: true });
   }
 
+  // Copy static assets from public/ to dist/
+  const PUBLIC_DIR = path.join(SITE_DIR, 'public');
+  if (fs.existsSync(PUBLIC_DIR)) {
+    fs.cpSync(PUBLIC_DIR, DIST_DIR, { recursive: true });
+    console.log('📁 Copied static assets from public/ to dist/');
+  }
+
   // ─── Generate Homepage ──────────────────────────────────────────────
   const homepageHtml = createPageHtml({
     title: 'The Louisian',
