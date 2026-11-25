@@ -325,7 +325,7 @@ async function generateSite() {
   console.log('✅ Generated index.html');
 
   // ─── Generate About page ────────────────────────────────────────────
-  const aboutBody = `
+  let aboutBody = `
     <article class="prose lg:prose-lg">
       <h1 id="main">About The Louisian</h1>
 
