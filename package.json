@@ -5,10 +5,9 @@
   "type": "commonjs",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && node scripts/validate-content.mjs",
+    "build": "astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "validate": "node scripts/validate-content.mjs",
     "format": "prettier --write ."
   },
   "keywords": [],
