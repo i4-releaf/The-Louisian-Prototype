@@ -140,7 +140,7 @@ async function generateSite() {
   const currentIssue = issues[0];
   const issueCardHtml = `
     <div class="issue-card">
-      <img src="/brand/issue-placeholder.jpg" alt="${currentIssue.title}" class="issue-image" />
+      <img src="/brand/issue-placeholder.svg" alt="${currentIssue.title}" class="issue-image" />
       <div class="issue-body">
         <span class="hero-category">Current Issue</span>
         <h2 class="issue-title"><a href="/issues/${currentIssue.slug}/">${currentIssue.volume} ${currentIssue.number}, ${currentIssue.sy}</a></h2>
@@ -258,7 +258,7 @@ async function generateSite() {
   // ─── Generate Issues Page ───────────────────────────────────────────
   const issuesHtml = issues.map(issue => `
     <div class="card issue-card" style="text-align: left;">
-      <img src="/brand/issue-placeholder.jpg" alt="${issue.title}" class="issue-image" />
+      <img src="/brand/issue-placeholder.svg" alt="${issue.title}" class="issue-image" />
       <div class="card-body" style="padding: 1.25rem;">
         <span class="hero-category">Issue</span>
         <h2 class="card-title" style="font-size: 1.5rem;"><a href="/issues/${issue.slug}/">${issue.volume} ${issue.number}, ${issue.sy}</a></h2>
@@ -293,7 +293,7 @@ async function generateSite() {
   const issueDetailBody = `
     <div class="container">
       <div class="article-hero">
-        <img src="/brand/issue-placeholder.jpg" alt="${issue.title}" class="article-image" />
+        <img src="/brand/issue-placeholder.svg" alt="${issue.title}" class="article-image" />
       </div>
       <div class="article-meta">
         <span class="article-category">Issue</span>
