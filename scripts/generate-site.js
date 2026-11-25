@@ -1,74 +1,35 @@
 /**
  * Static site generator for The Louisian
- * Generates HTML files from Astro content without needing the Astro CLI
- * Works around Netlify container permission issues with the astro binary
+ * Magazine-style layout with real content
  */
 
 const fs = require('fs');
 const path = require('path');
-const { parse } = require('remark-html');
-const { format } = require('date-fns');
-
-// ─── CONFIGURATION ───────────────────────────────────────────────────────
+const { boardData, articles, issues, tags } = require('./content-data');
 
 const SITE_DIR = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(SITE_DIR, 'dist');
-const SRC_DIR = path.join(SITE_DIR, 'src');
-
-// Design tokens (matching global.css)
-const TOKENS = {
-  navy: '#081426',
-  navy800: '#0F2342',
-  gold: '#FBBF24',
-  gold500: '#F59E0B',
-  gold700: '#8A6D1F',
-  blue200: '#BFDBFE',
-  paper: '#FFFDF8',
-  ink: '#111827',
-  muted: '#4B5563',
-  line: '#E5E7EB',
-};
-
-// ─── HELPER FUNCTIONS ────────────────────────────────────────────────────
 
 function htmlEscape(text) {
   return text
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
 
-function formatDate(date, formatStr = 'MMMM d, yyyy') {
-  return format(new Date(date), formatStr);
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('en-PH', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
 }
-
-function uppercaseFirst(str) {
-  return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
-}
-
-// ─── PAGE TEMPLATES ─────────────────────────────────────────────────────
 
 const createPageHtml = (opts) => {
-  const {
-    title,
-    metaDesc,
-    canonical,
-    bodyHtml,
-    styles,
-    scripts,
-    isHomepage,
-  } = opts;
+  const { title, metaDesc, canonical, bodyHtml, styles } = opts;
+  const styleBlock = styles ? `<style>\n${styles}\n</style>` : '';
 
-  const styleBlock = styles
-    ? `<style>
-${styles}
-</style>`
-    : '';
-
-  return `
-<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en-PH">
   <head>
     <meta charset="utf-8" />
@@ -85,34 +46,26 @@ ${styles}
   <body class="bg-navy-800 text-paper">
     <a href="#main" class="skip-link">Skip to content</a>
 
-    <header class="border-b --line bg-navy-900/80">
-      <div class="max-w-[1280px] mx-auto px-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <img
-            src="/brand/crest.svg"
-            alt="The Louisian — Home"
-            width="48"
-            height="48"
-            class="hidden sm:block"
-          />
-          <h1 class="text-2xl font-playfair display:block">The Louisian</h1>
+    <header class="border-b line bg-navy-900">
+      <div class="container header-inner">
+        <div class="masthead">
+          <img src="/brand/crest.svg" alt="The Louisian crest" width="40" height="40" class="crest" />
+          <h1>The Louisian</h1>
         </div>
-
-        <nav class="hidden sm:block">
-          <a href="/news/" class="mr-4 text-[--gold-700] underline">News</a>
-          <a href="/feature/" class="mr-4 text-[--gold-700] underline">Feature</a>
-          <a href="/sports/" class="mr-4 text-[--gold-700] underline">Sports</a>
-          <a href="/sci-tech/" class="mr-4 text-[--gold-700] underline">Sci-Tech</a>
-          <a href="/opinion/" class="mr-4 text-[--gold-700] underline">Opinion</a>
-          <a href="/cartoon/" class="mr-4 text-[--gold-700] underline">Cartoon</a>
-          <a href="/multimedia/" class="mr-4 text-[--gold-700] underline">Multimedia</a>
-          <a href="/issues/" class="text-[--gold-700] underline">Issues</a>
+        <nav class="nav-section">
+          <a href="/news/">News</a>
+          <a href="/feature/">Feature</a>
+          <a href="/sports/">Sports</a>
+          <a href="/sci-tech/">Sci-Tech</a>
+          <a href="/opinion/">Opinion</a>
+          <a href="/cartoon/">Cartoon</a>
+          <a href="/multimedia/">Multimedia</a>
+          <a href="/issues/">Issues</a>
         </nav>
-
-        <div class="flex items-center gap-4">
-          <a href="/about/" class="text-[--blue-200] hover:text-[--gold-500]">About</a>
-          <a href="/board/" class="text-[--blue-200] hover:text-[--gold-500]">Board</a>
-          <a href="/contact/" class="text-[--blue-200] hover:text-[--gold-500]">Contact</a>
+        <div class="meta-section">
+          <a href="/about/">About</a>
+          <a href="/board/">Board</a>
+          <a href="/contact/">Contact</a>
         </div>
       </div>
     </header>
@@ -121,76 +74,26 @@ ${styles}
       ${bodyHtml}
     </main>
 
-    <footer class="border-t --line bg-navy-900 py-8">
-      <div class="max-w-[1280px] mx-auto px-4">
-        <p class="text-[--muted] text-sm">
-          &copy; 2026 The Louisian. All rights reserved.
-        </p>
+    <footer class="border-t line bg-navy-900 py-8">
+      <div class="container footer-inner">
+        <p>&copy; 2026 The Louisian. All rights reserved.</p>
       </div>
     </footer>
 
     <style>
-      .skip-link {
-        position: absolute;
-        left: -1000px;
-        top: auto;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        transition: top 0.2s;
-      }
-      .skip-link:focus {
-        left: 0;
-        top: 0;
-        width: auto;
-        height: auto;
-        color: var(--navy-800);
-        background: var(--paper);
-        padding: 8px;
-        z-index: 100;
-      }
-      .prose {
-        max-width: 68ch;
-        margin-left: auto;
-        margin-right: auto;
-      }
+      .skip-link { position: absolute; left: -1000px; top: auto; width: 1px; height: 1px; overflow: hidden; transition: top 0.2s; }
+      .skip-link:focus { left: 0; top: 0; width: auto; height: auto; color: var(--navy-800); background: var(--paper); padding: 8px; z-index: 100; }
+      .prose { max-width: 68ch; margin-left: auto; margin-right: auto; }
     </style>
   </body>
 </html>`;
 };
 
-// ─── CONTENT DATA ────────────────────────────────────────────────────────
-
-// Board data (S.Y. 2026–2027)
-const boardData = [
-  { order: 1, name: 'Crissa Mae B. Umengan', role: 'Editor-in-Chief', group: 'leadership' },
-  { order: 2, name: 'Chester Kyle B. Balingit', role: 'Associate Editor-in-Chief', group: 'leadership' },
-  { order: 3, name: 'Prince Jasper M. De Guzman', role: 'Managing Editor', group: 'leadership' },
-  { order: 4, name: 'Hannah Sophia L. Foronda', role: 'Circulation Editor', group: 'editors' },
-  { order: 5, name: 'Keirsten Hayce P. Aberin', role: 'News Editor', group: 'editors' },
-  { order: 6, name: 'Sophia Isabelle A. Dumo', role: 'Feature Editor', group: 'editors' },
-  { order: 7, name: 'Princess Rhyel G. Solis', role: 'Sci-Tech Editor', group: 'editors' },
-  { order: 8, name: 'Ada Ellesse A. Castillo', role: 'Sports Editor', group: 'editors' },
-  { order: 9, name: 'Danielle Mae E. Caccam', role: 'Editorial Writing Editor', group: 'editors' },
-  { order: 10, name: 'Alkean J. Dela Peña', role: 'Editorial Cartooning Editor', group: 'editors' },
-  { order: 11, name: 'Jhillyane Rayne M. Lorenzo', role: 'Column Editor', group: 'editors' },
-  { order: 12, name: 'Frances Elaine M. Olsim', role: 'Copyediting Editor', group: 'editors' },
-  { order: 13, name: 'Aurora Consuelo J. Soriano', role: 'Photojournalism Editor', group: 'editors' },
-  { order: 14, name: 'Jurimae Nica P. Balaoag', role: 'Broadcasting Editor', group: 'editors' },
-  { order: 15, name: 'Justine Faye J. Burgos', role: 'Layout Editor', group: 'editors' },
-  { order: 16, name: 'Christof Julian J. De Leon', role: 'Video or Technical Editor', group: 'editors' },
-  { order: 17, name: 'Ma. Niza Rodillas', role: 'Publication Adviser', group: 'adviser' },
-];
-
-// ─── GENERATE PAGES ─────────────────────────────────────────────────────
-
 async function generateSite() {
-  // Ensure dist directory exists
   if (!fs.existsSync(DIST_DIR)) {
     fs.mkdirSync(DIST_DIR, { recursive: true });
   }
 
-  // Copy static assets from public/ to dist/
   const PUBLIC_DIR = path.join(SITE_DIR, 'public');
   if (fs.existsSync(PUBLIC_DIR)) {
     fs.cpSync(PUBLIC_DIR, DIST_DIR, { recursive: true });
@@ -198,154 +101,256 @@ async function generateSite() {
   }
 
   // ─── Generate Homepage ──────────────────────────────────────────────
+  const hero = articles[0];
+  const leads = articles.slice(1, 3);
+  const rail = articles.slice(3);
+
+  const heroHtml = `
+    <div class="hero">
+      <img src="${hero.image}" alt="${htmlEscape(hero.title)}" class="hero-image" />
+      <div class="hero-body">
+        <span class="hero-category">${hero.section}</span>
+        <h2 class="hero-title"><a href="/${hero.section.toLowerCase()}/${hero.slug}/">${hero.title}</a></h2>
+        <span class="hero-date">${formatDate(hero.date)}</span>
+      </div>
+    </div>
+  `;
+
+  const leadsHtml = leads.map(a => `
+    <div class="card">
+      <img src="${a.image}" alt="${htmlEscape(a.title)}" class="card-image" />
+      <div class="card-body">
+        <span class="card-category">${a.section}</span>
+        <h3 class="card-title"><a href="/${a.section.toLowerCase()}/${a.slug}/">${a.title}</a></h3>
+        <span class="card-date">${formatDate(a.date)}</span>
+      </div>
+    </div>
+  `).join('');
+
+  const railHtml = rail.map(a => `
+    <div class="card">
+      <div class="card-body" style="padding: 0.75rem 1rem;">
+        <span class="card-category">${a.section}</span>
+        <h3 class="card-title" style="font-size: 1rem;"><a href="/${a.section.toLowerCase()}/${a.slug}/">${a.title}</a></h3>
+        <span class="card-date">${formatDate(a.date)}</span>
+      </div>
+    </div>
+  `).join('');
+
+  const currentIssue = issues[0];
+  const issueCardHtml = `
+    <div class="issue-card">
+      <img src="/brand/issue-placeholder.jpg" alt="${currentIssue.title}" class="issue-image" />
+      <div class="issue-body">
+        <span class="hero-category">Current Issue</span>
+        <h2 class="issue-title"><a href="/issues/${currentIssue.slug}/">${currentIssue.volume} ${currentIssue.number}, ${currentIssue.sy}</a></h2>
+        <p class="issue-subtitle">${currentIssue.description}</p>
+        <a href="/issues/${currentIssue.slug}/" class="btn btn--gold" style="margin-right: 0.5rem;">Read the issue</a>
+        <a href="${currentIssue.pdf}" class="btn btn--navy">Download PDF</a>
+      </div>
+    </div>
+  `;
+
+  const newsletterHtml = `
+    <div class="newsletter-band">
+      <h3>Get The Louisian in your inbox.</h3>
+      <p>New issues and top stories. No spam.</p>
+      <form action="https://buttondown.com/api/emails/embed-subscribe/thelouisianprototype" method="post" style="display: flex; gap: 8px; max-width: 400px; margin: 1.5rem auto 0;">
+        <input type="email" name="email" placeholder="Enter email" required style="flex: 1; padding: 0.5rem; border: 1px solid var(--ink); border-radius: var(--radius);" />
+        <button type="submit" style="padding: 0.5rem 1rem; background: var(--gold-400); color: var(--navy-800); border: none; border-radius: var(--radius); font-weight: 700; cursor: pointer;">Subscribe</button>
+      </form>
+      <p style="font-size: 0.75rem; color: var(--blue-200); margin-top: 1rem;">
+        We respect your privacy. <a href="/contact/#privacy" style="color: var(--gold-400);">View our privacy policy.</a>
+      </p>
+    </div>
+  `;
+
+  const homepageBody = `
+    <div class="container">
+      ${heroHtml}
+      <div class="section-grid">${leadsHtml}</div>
+      <div class="section-header">
+        <h2 class="section-title">Latest Stories</h2>
+        <a href="/news/" class="section-link">View all →</a>
+      </div>
+      <div class="section-grid" style="grid-template-columns: repeat(3, 1fr);">${railHtml}</div>
+      ${issueCardHtml}
+      ${newsletterHtml}
+    </div>
+  `;
+
   const homepageHtml = createPageHtml({
     title: 'The Louisian',
     metaDesc: 'The official student publication of Saint Louis University BEdS – Senior High Department',
-    canonical: 'https://thelouisian.netlify.app/',
-    bodyHtml: `
-      <section class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-7">
-        <!-- Hero story -->
-        <article class="group border rounded --radius overflow-hidden">
-          <img
-            src="/brand/hero-placeholder.jpg"
-            alt="Hero story image"
-            class="w-full h-48 object-cover group-hover:opacity-90 transition-opacity"
-          />
-          <div class="p-4">
-            <p class="uppercase text-[--gold-500] text-sm tracking-wider">News</p>
-            <h2 class="text-xl font-playfair mt-2 group-hover:text-[--gold-400] transition-colors">SLU BEdS opens new senior high annex</h2>
-            <p class="text-[--muted] text-sm mt-1">November 20, 2026</p>
-          </div>
-        </article>
-
-        <!-- Secondary leads -->
-        <article class="group border rounded --radius overflow-hidden sm:col-span-2 lg:col-span-5 p-4">
-          <img
-            src="/brand/lead-placeholder.jpg"
-            alt="Lead story image"
-            class="w-full h-24 object-cover group-hover:opacity-90 transition-opacity mb-3"
-          />
-          <p class="uppercase text-[--gold-500] text-sm tracking-wider">Feature</p>
-          <h3 class="font-playfair text-base mt-1 group-hover:text-[--gold-400] transition-colors">Inside the first Louisian podcast recording</h3>
-          <p class="text-[--muted] text-xs mt-1">November 22, 2026</p>
-        </article>
-
-        <article class="group border rounded --radius overflow-hidden sm:col-span-2 lg:col-span-5 p-4">
-          <img
-            src="/brand/lead-placeholder.jpg"
-            alt="Lead story image"
-            class="w-full h-24 object-cover group-hover:opacity-90 transition-opacity mb-3"
-          />
-          <p class="uppercase text-[--gold-500] text-sm tracking-wider">Sports</p>
-          <h3 class="font-playfair text-base mt-1 group-hover:text-[--gold-400] transition-colors">Senior high intramurals 2026</h3>
-          <p class="text-[--muted] text-xs mt-1">November 18, 2026</p>
-        </article>
-      </section>
-
-      <!-- Latest news rail -->
-      <section class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <article class="border rounded --radius p-4 bg-paper">
-          <p class="uppercase text-[--gold-500] text-sm tracking-wider">News</p>
-          <h3 class="font-playfair text-base mt-1">SLU BEdS opens new annex</h3>
-          <p class="text-[--muted] text-sm">New 18-classroom annex opens November 20.</p>
-        </article>
-
-        <article class="border rounded --radius p-4 bg-paper">
-          <p class="uppercase text-[--gold-500] text-sm tracking-wider">Feature</p>
-          <h3 class="font-playfair text-base mt-1">Podcast pilot</h3>
-          <p class="text-[--muted] text-sm">First recording in the JVB media lab.</p>
-        </article>
-
-        <article class="border rounded --radius p-4 bg-paper">
-          <p class="uppercase text-[--gold-500] text-sm tracking-wider">Sci-Tech</p>
-          <h3 class="font-playfair text-base mt-1">Tech tips for students</h3>
-          <p class="text-[--muted] text-sm">Productivity tools for senior high.</p>
-        </article>
-      </section>
-
-      <!-- Current issue card -->
-      <section class="mt-8 p-4 bg-paper rounded --radius">
-        <p class="uppercase text-[--gold-500] text-sm tracking-wider">Current Issue</p>
-        <h3 class="font-playfair text-lg mt-1">Volume 04, No. 1, S.Y. 2026–2027</h3>
-        <p class="text-[--muted] text-sm">The facilities issue: new annex, library renovation, cost of staying cool.</p>
-        <a
-          href="/issues/vol-04-issue-01/"
-          class="mt-2 inline-block text-[--gold-700] underline"
-          >Read the issue
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </a>
-        <a
-          href="/issues/vol-04-issue-01/pdf/"
-          class="mt-2 inline-block ml-2 text-[--gold-400] underline"
-          >Download PDF
-        </a>
-      </section>
-
-      <!-- Newsletter band -->
-      <section class="mt-12">
-        <h3 class="font-playfair text-lg mb-2">Get The Louisian in your inbox.</h3>
-        <p class="text-[--muted] text-sm mb-4">New issues and top stories. No spam.</p>
-        <form
-          action="https://buttondown.com/api/emails/embed-subscribe/thelouisianprototype"
-          method="post"
-          class="max-w-md"
-          style="display: flex; gap: 8px;"
-        >
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter email"
-            required
-            style="flex: 1; padding: 8px; border: 1px solid var(--ink); border-radius: var(--radius);"
-          />
-          <button
-            type="submit"
-            style="padding: 8px 16px; background: var(--gold-400); color: var(--navy-800); border: none; border-radius: var(--radius); font-weight: 700;"
-          >
-            Subscribe
-          </button>
-        </form>
-        <p class="text-[--muted] text-xs mt-4">
-          We respect your privacy. <a href="/contact/#privacy" style="color: var(--gold-400);">View our privacy policy.</a>
-        </p>
-      </section>
-    `,
-    styles: `.skip-link { position: absolute; left: -1000px; top: auto; width: 1px; height: 1px; overflow: hidden; transition: top 0.2s; } .skip-link:focus { left: 0; top: 0; width: auto; height: auto; color: var(--navy-800); background: var(--paper); padding: 8px; z-index: 100; } .prose { max-width: 68ch; margin-left: auto; margin-right: auto; }`,
-
-    scripts: '',
-    isHomepage: true,
+    canonical: 'https://thelouisianprototype.netlify.app/',
+    bodyHtml: homepageBody,
   });
-
   fs.writeFileSync(path.join(DIST_DIR, 'index.html'), homepageHtml);
   console.log('✅ Generated index.html');
 
-  // ─── Generate About page ────────────────────────────────────────────
-  let aboutBody = `
-    <article class="prose lg:prose-lg">
+  // ─── Generate Section Pages ─────────────────────────────────────────
+  const sections = ['news', 'feature', 'sports', 'sci-tech', 'opinion', 'cartoon', 'multimedia'];
+  sections.forEach(section => {
+    const sectionArticles = articles.filter(a => a.section.toLowerCase() === section);
+    const articlesHtml = sectionArticles.map(a => `
+      <article class="card">
+        <img src="${a.image}" alt="${htmlEscape(a.title)}" class="card-image" />
+        <div class="card-body">
+          <span class="card-category">${a.section}</span>
+          <h2 class="card-title" style="font-size: 1.25rem;"><a href="/${section}/${a.slug}/">${a.title}</a></h2>
+          <p class="card-date">${formatDate(a.date)} — by ${a.author}</p>
+        </div>
+      </article>
+    `).join('');
+
+    const sectionBody = `
+      <div class="container">
+        <div class="section-header">
+          <h1 id="main">${section.charAt(0).toUpperCase() + section.slice(1)}</h1>
+        </div>
+        <div class="two-col">${articlesHtml}</div>
+      </div>
+    `;
+
+    const sectionHtml = createPageHtml({
+      title: `${section.charAt(0).toUpperCase() + section.slice(1)} — The Louisian`,
+      metaDesc: `${section} stories from The Louisian student publication`,
+      canonical: `https://thelouisianprototype.netlify.app/${section}/`,
+      bodyHtml: sectionBody,
+    });
+    const sectionDir = path.join(DIST_DIR, section);
+    fs.mkdirSync(sectionDir, { recursive: true });
+    fs.writeFileSync(path.join(sectionDir, 'index.html'), sectionHtml);
+    console.log(`✅ Generated ${section}/index.html`);
+
+    // Generate individual article pages
+    sectionArticles.forEach(a => {
+      const articleBody = `
+        <div class="container">
+          <div class="article-hero">
+            <img src="${a.image}" alt="${htmlEscape(a.title)}" class="article-image" />
+          </div>
+          <div class="article-meta">
+            <span class="article-category">${a.section}</span>
+            <h1 class="article-title">${a.title}</h1>
+            <div class="article-byline">By ${a.author} · ${formatDate(a.date)}</div>
+          </div>
+          <div class="article-content prose">
+            <p>${a.body}</p>
+          </div>
+          <p style="margin-top: 2rem;">
+            <a href="/${section}/" style="color: var(--gold-400);">← Back to ${section}</a>
+          </p>
+        </div>
+      `;
+
+      const articleHtml = createPageHtml({
+        title: `${a.title} — The Louisian`,
+        metaDesc: a.excerpt,
+        canonical: `https://thelouisianprototype.netlify.app/${section}/${a.slug}/`,
+        bodyHtml: articleBody,
+      });
+      fs.writeFileSync(path.join(sectionDir, `${a.slug}.html`), articleHtml);
+      console.log(`✅ Generated ${section}/${a.slug}.html`);
+    });
+  });
+
+  // ─── Generate Issues Page ───────────────────────────────────────────
+  const issuesHtml = issues.map(issue => `
+    <div class="card issue-card" style="text-align: left;">
+      <img src="/brand/issue-placeholder.jpg" alt="${issue.title}" class="issue-image" />
+      <div class="card-body" style="padding: 1.25rem;">
+        <span class="hero-category">Issue</span>
+        <h2 class="card-title" style="font-size: 1.5rem;"><a href="/issues/${issue.slug}/">${issue.volume} ${issue.number}, ${issue.sy}</a></h2>
+        <p class="card-date">${issue.date}</p>
+        <p style="color: var(--muted); margin-bottom: 1rem;">${issue.description}</p>
+        <a href="${issue.heyzine}" class="btn btn--gold" style="margin-right: 0.5rem;">Read on HeyZine</a>
+        <a href="${issue.pdf}" class="btn btn--navy">Download PDF</a>
+      </div>
+    </div>
+  `).join('');
+
+  const issuesBody = `
+    <div class="container">
+      <h1 id="main" style="font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1rem;">Issues Archive</h1>
+      <div class="issues-grid">${issuesHtml}</div>
+    </div>
+  `;
+
+  const issuesHtmlPage = createPageHtml({
+    title: 'Issues — The Louisian',
+    metaDesc: 'Read past issues of The Louisian student publication',
+    canonical: 'https://thelouisianprototype.netlify.app/issues/',
+    bodyHtml: issuesBody,
+  });
+  const issuesDir = path.join(DIST_DIR, 'issues');
+  fs.mkdirSync(issuesDir, { recursive: true });
+  fs.writeFileSync(path.join(issuesDir, 'index.html'), issuesHtmlPage);
+  console.log('✅ Generated issues/index.html');
+
+  // Issue detail page
+  const issue = issues[0];
+  const issueDetailBody = `
+    <div class="container">
+      <div class="article-hero">
+        <img src="/brand/issue-placeholder.jpg" alt="${issue.title}" class="article-image" />
+      </div>
+      <div class="article-meta">
+        <span class="article-category">Issue</span>
+        <h1 class="article-title">${issue.volume} ${issue.number}, ${issue.sy}</h1>
+        <div class="article-byline">${issue.date} · ${issue.title}</div>
+      </div>
+      <div class="article-content prose">
+        <p>${issue.description}</p>
+        <p style="margin-top: 2rem;">
+          <a href="${issue.heyzine}" class="btn btn--gold" style="margin-right: 0.5rem;">Read on HeyZine</a>
+          <a href="${issue.pdf}" class="btn btn--navy">Download PDF</a>
+        </p>
+      </div>
+      <p style="margin-top: 2rem;">
+        <a href="/issues/" style="color: var(--gold-400);">← Back to Issues</a>
+      </p>
+    </div>
+  `;
+
+  const issueDetailHtml = createPageHtml({
+    title: `${issue.volume} ${issue.number} — The Louisian`,
+    metaDesc: issue.description,
+    canonical: `https://thelouisianprototype.netlify.app/issues/${issue.slug}/`,
+    bodyHtml: issueDetailBody,
+  });
+  fs.writeFileSync(path.join(issuesDir, `${issue.slug}.html`), issueDetailHtml);
+  console.log(`✅ Generated issues/${issue.slug}.html`);
+
+  // PDF redirect page
+  const pdfBody = `
+    <div class="container prose" style="max-width: 68ch; margin: 3rem auto;">
+      <h1>Download PDF</h1>
+      <p>Redirecting to the HeyZine PDF viewer...</p>
+      <p>If you are not redirected, <a href="${issue.heyzine}" style="color: var(--gold-400);">click here</a>.</p>
+    </div>
+    <script>window.location.href = '${issue.heyzine}';</script>
+  `;
+
+  const pdfHtml = createPageHtml({
+    title: 'Download PDF — The Louisian',
+    metaDesc: 'Download the current issue PDF',
+    canonical: `https://thelouisianprototype.netlify.app/issues/${issue.slug}/pdf/`,
+    bodyHtml: pdfBody,
+  });
+  fs.writeFileSync(path.join(issuesDir, `${issue.slug}-pdf.html`), pdfHtml);
+  console.log(`✅ Generated issues/${issue.slug}-pdf.html`);
+
+  // ─── Generate About Page ──────────────────────────────────────────────
+  const aboutBody = `
+    <div class="container prose">
       <h1 id="main">About The Louisian</h1>
 
-      <h2 class="font-playfair text-[--gold-400] mt-8">Mission</h2>
-      <p>
-        The Louisian is the official student publication of Saint Louis University
-        BEdS – Senior High Department. We are students writing for students,
-        covering campus life, administration, arts, sports, and everything in
-        between.
-      </p>
+      <h2 style="font-family: var(--font-display); color: var(--gold-400);">Mission</h2>
+      <p>The Louisian is the official student publication of Saint Louis University BEdS – Senior High Department. We are students writing for students, covering campus life, administration, arts, sports, and everything in between.</p>
 
-      <h2 class="font-playfair text-[--gold-400] mt-8" id="standards">How we work</h2>
-      <ul class="list-disc pl-6 space-y-2 text-[--muted]">
+      <h2 style="font-family: var(--font-display); color: var(--gold-400);">How we work</h2>
+      <ul style="list-style: disc inside; color: var(--muted); line-height: 1.8;">
         <li>Human-written articles only. No AI-generated text or AI-altered news images.</li>
         <li>Our photos are taken by Louisian photojournalists. Every image is credited.</li>
         <li>We correct major factual errors publicly, with a dated note.</li>
@@ -353,214 +358,122 @@ async function generateSite() {
         <li>Editorial decisions are made by the student board. The adviser reviews sensitive material for safety and legal risk, not to dictate position.</li>
       </ul>
 
-      <h2 class="font-playfair text-[--gold-400] mt-8">Contact</h2>
+      <h2 style="font-family: var(--font-display); color: var(--gold-400);">Contact</h2>
       <p>Official email: <a href="mailto:13007796@slu.edu.ph">13007796@slu.edu.ph</a></p>
       <p>Send a tip, a letter to the editor, a correction/privacy request, or join the staff via the <a href="/contact/">Contact</a> page.</p>
 
-      <h2 class="font-playfair text-[--gold-400] mt-8">Board (S.Y. 2026–2027)</h2>
-      <ol class="list-decimal pl-6 space-y-1 text-[--muted]">
-`;
-
-  let boardHtml = '';
-  boardData.forEach((member) => {
-    boardHtml += `<li>${member.name} — ${member.role}</li>\n`;
-  });
-  aboutBody += boardHtml;
-
-  aboutBody += `</ol></article>`;
+      <h2 style="font-family: var(--font-display); color: var(--gold-400);">Board (S.Y. 2026–2027)</h2>
+      <ol style="list-style: decimal inside; color: var(--muted); line-height: 1.8;">
+        ${boardData.map(m => `<li><strong>${m.name}</strong> — ${m.role}</li>`).join('')}
+      </ol>
+    </div>
+  `;
 
   const aboutHtml = createPageHtml({
     title: 'About The Louisian',
-    metaDesc: 'The official student publication of Saint Louis University BEdS – Senior High Department',
-    canonical: 'https://thelouisian.netlify.app/about/',
+    metaDesc: 'About The Louisian student publication — mission, standards, and editorial board',
+    canonical: 'https://thelouisianprototype.netlify.app/about/',
     bodyHtml: aboutBody,
-    styles: `.prose { max-width: 68ch; margin-left: auto; margin-right: auto; } .prose h1, .prose h2, .prose h3 { font-family: "Playfair Display", Georgia, "Times New Roman", serif; }`,
-    isHomepage: false,
   });
-
   fs.writeFileSync(path.join(DIST_DIR, 'about.html'), aboutHtml);
   console.log('✅ Generated about.html');
 
-  // ─── Generate Board page ────────────────────────────────────────────
+  // ─── Generate Board Page ────────────────────────────────────────────
+  const leadership = boardData.filter(m => m.group === 'leadership');
+  const editors = boardData.filter(m => m.group === 'editors');
+  const adviser = boardData.find(m => m.group === 'adviser');
+
   const boardBody = `
-    <article class="prose lg:prose-lg">
+    <div class="container prose">
       <h1 id="main">Editorial Board</h1>
-      <p class="text-[--muted] text-lg mb-8">S.Y. 2026–2027</p>
-      <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+      <p style="color: var(--muted); font-size: 1.125rem;">S.Y. 2026–2027</p>
+
+      <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
         <div>
-          <h3 class="font-playfair text-[--gold-400] mb-3">Leadership</h3>
-          <ol class="list-decimal pl-3 text-[--muted]">
-            <li>Crissa Mae B. Umengan — Editor-in-Chief</li>
-            <li>Chester Kyle B. Balingit — Associate Editor-in-Chief</li>
-            <li>Prince Jasper M. De Guzman — Managing Editor</li>
+          <h2 style="font-family: var(--font-display); color: var(--gold-400);">Leadership</h2>
+          <ol style="list-style: decimal inside; color: var(--muted); line-height: 1.8;">
+            ${leadership.map(m => `<li><strong>${m.name}</strong> — ${m.role}</li>`).join('')}
           </ol>
         </div>
         <div>
-          <h3 class="font-playfair text-[--gold-400] mb-3">Editors</h3>
-          <ol class="list-decimal pl-3 text-[--muted]">
-            <li>Hannah Sophia L. Foronda — Circulation Editor</li>
-            <li>Keirsten Hayce P. Aberin — News Editor</li>
-            <li>Sophia Isabelle A. Dumo — Feature Editor</li>
-            <li>Princess Rhyel G. Solis — Sci-Tech Editor</li>
-            <li>Ada Ellesse A. Castillo — Sports Editor</li>
-            <li>Danielle Mae E. Caccam — Editorial Writing Editor</li>
-            <li>Alkean J. Dela Peña — Editorial Cartooning Editor</li>
-            <li>Jhillyane Rayne M. Lorenzo — Column Editor</li>
-            <li>Frances Elaine M. Olsim — Copyediting Editor</li>
-            <li>Aurora Consuelo J. Soriano — Photojournalism Editor</li>
-            <li>Jurimae Nica P. Balaoag — Broadcasting Editor</li>
-            <li>Justine Faye J. Burgos — Layout Editor</li>
-            <li>Christof Julian J. De Leon — Video or Technical Editor</li>
+          <h2 style="font-family: var(--font-display); color: var(--gold-400);">Editors</h2>
+          <ol style="list-style: decimal inside; color: var(--muted); line-height: 1.8;">
+            ${editors.map(m => `<li><strong>${m.name}</strong> — ${m.role}</li>`).join('')}
           </ol>
         </div>
         <div>
-          <h3 class="font-playfair text-[--gold-400] mb-3">Adviser</h3>
-          <p class="text-[--muted]">Ma. Niza Rodillas</p>
+          <h2 style="font-family: var(--font-display); color: var(--gold-400);">Adviser</h2>
+          <p style="color: var(--muted);"><strong>${adviser.name}</strong> — ${adviser.role}</p>
         </div>
       </div>
-    </article>
-`;
+    </div>
+  `;
 
-  boardHtml = createPageHtml({
-    title: 'Editorial Board',
-    metaDesc: 'The official student publication of Saint Louis University BEdS – Senior High Department',
-    canonical: 'https://thelouisian.netlify.app/board/',
+  const boardHtml = createPageHtml({
+    title: 'Editorial Board — The Louisian',
+    metaDesc: 'The Louisian editorial board S.Y. 2026–2027',
+    canonical: 'https://thelouisianprototype.netlify.app/board/',
     bodyHtml: boardBody,
-    styles: `.prose { max-width: 68ch; margin-left: auto; margin-right: auto; }`,
-    isHomepage: false,
   });
-
   fs.writeFileSync(path.join(DIST_DIR, 'board.html'), boardHtml);
   console.log('✅ Generated board.html');
 
-  // ─── Generate Contact page ──────────────────────────────────────────
+  // ─── Generate Contact Page ──────────────────────────────────────────
   const contactBody = `
-    <article class="prose lg:prose-lg">
+    <div class="container prose">
       <h1 id="main">Contact The Louisian</h1>
 
-      <p class="text-[--muted] text-lg mb-8">
-        Send a tip, a letter to the editor, a correction/privacy request, or join
-        the staff.
+      <p style="color: var(--muted); font-size: 1.125rem;">
+        Send a tip, a letter to the editor, a correction/privacy request, or join the staff.
       </p>
 
-      <form
-        action="https://netlify.com/forms/contact"
-        method="POST"
-        class="space-y-4 max-w-md"
-        style="display: flex; flex-direction: column; gap: 12px;"
-      >
+      <form action="https://netlify.com/forms/contact" method="POST" style="display: flex; flex-direction: column; gap: 1rem; max-width: 500px;">
         <input type="hidden" name="formName" value="contact" />
-        <input
-          type="text"
-          name="name"
-          placeholder="Your name (optional)"
-          style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Your email (optional)"
-          style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
-        />
-        <select
-          name="purpose"
-          style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
-        >
+        <input type="text" name="name" placeholder="Your name (optional)" style="padding: 0.5rem; border: 1px solid var(--ink); border-radius: var(--radius); font-family: inherit;" />
+        <input type="email" name="email" placeholder="Your email (optional)" style="padding: 0.5rem; border: 1px solid var(--ink); border-radius: var(--radius); font-family: inherit;" />
+        <select name="purpose" style="padding: 0.5rem; border: 1px solid var(--ink); border-radius: var(--radius); font-family: inherit;">
           <option value="tip">Tip</option>
           <option value="letter">Letter to the Editor</option>
           <option value="correction">Correction/Privacy Request</option>
           <option value="join">Join the Staff</option>
           <option value="other">Other</option>
         </select>
-        <textarea
-          name="message"
-          rows="4"
-          placeholder="Your message (20–5,000 characters)"
-          style="padding: 8px; border: 1px var(--ink); border-radius: var(--radius);"
-        ></textarea>
-        <div class="flex items-start">
-          <input
-            type="checkbox"
-            name="consent"
-            required
-            style="margin-top: 4px; width: 18px; height: 18px; cursor: pointer;"
-          />
-          <span
-            style="
-              margin-left: 8px;
-              cursor: pointer;
-              text-[--muted];
-              font-size: 0.875rem;
-            "
-          >
-            I have read the <a href="#privacy" style="color: var(--gold-400);">privacy note</a>
-            below.
-          </span>
+        <textarea name="message" rows="4" placeholder="Your message" style="padding: 0.5rem; border: 1px solid var(--ink); border-radius: var(--radius); font-family: inherit;"></textarea>
+        <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+          <input type="checkbox" name="consent" required style="width: 18px; height: 18px; margin-top: 0.1rem;" />
+          <label style="font-size: 0.875rem; color: var(--muted); cursor: pointer;">
+            I have read the <a href="#privacy" style="color: var(--gold-400);">privacy note</a> below.
+          </label>
         </div>
-        <button
-          type="submit"
-          style="
-            padding: 10px;
-            background: var(--gold-400);
-            color: var(--navy-800);
-            border: none;
-            border-radius: var(--radius);
-            font-weight: 700;
-          "
-        >
+        <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--gold-400); color: var(--navy-800); border: none; border-radius: var(--radius); font-weight: 700; cursor: pointer; font-family: inherit;">
           Send to The Louisian
         </button>
       </form>
 
-      <hr class="my-8 border-t --line" />
+      <hr style="border: 0; border-top: 1px solid var(--line); margin: 2rem 0;" />
 
-      <h2 id="privacy" class="font-playfair text-[--gold-400] mb-3">Privacy note</h2>
-      <div class="prose lg:prose-lg text-[--muted]">
-        <p>
-          What we collect: If you use the contact form, we receive the name and
-          email you choose to provide, plus your message. If you subscribe to the
-          newsletter, Buttondown stores your email. We use Cloudflare Web
-          Analytics for aggregate page counts; it does not use cookies or collect
-          personal data.
-        </p>
-        <p>
-          Who sees it: The editorial board and adviser. We do not publish your
-          contact details or sell them.
-        </p>
-        <p>
-          How long: Form submissions are kept for up to 12 months, then deleted.
-          Newsletter emails stay until you unsubscribe.
-        </p>
-        <p>
-          Removal: Email <a href="mailto:13007796@slu.edu.ph">13007796@slu.edu.ph</a>
-          or use the contact form with "Correction/Privacy Request" to ask for
-          deletion. We respond within 5 school days.
-        </p>
-        <p>
-          Third parties: Netlify (forms and hosting), Buttondown (newsletter),
-          Cloudflare (analytics). HeyZine, YouTube, and Facebook embeds load only
-          after you click them, and their privacy policies apply once loaded.
-        </p>
+      <h2 id="privacy" style="font-family: var(--font-display); color: var(--gold-400);">Privacy note</h2>
+      <div style="color: var(--muted); line-height: 1.8;">
+        <p><strong>What we collect:</strong> If you use the contact form, we receive the name and email you choose to provide, plus your message. If you subscribe to the newsletter, Buttondown stores your email. We use Cloudflare Web Analytics for aggregate page counts; it does not use cookies or collect personal data.</p>
+        <p><strong>Who sees it:</strong> The editorial board and adviser. We do not publish your contact details or sell them.</p>
+        <p><strong>How long:</strong> Form submissions are kept for up to 12 months, then deleted. Newsletter emails stay until you unsubscribe.</p>
+        <p><strong>Removal:</strong> Email <a href="mailto:13007796@slu.edu.ph">13007796@slu.edu.ph</a> or use the contact form with "Correction/Privacy Request" to ask for deletion. We respond within 5 school days.</p>
+        <p><strong>Third parties:</strong> Netlify (forms and hosting), Buttondown (newsletter), Cloudflare (analytics). HeyZine, YouTube, and Facebook embeds load only after you click them, and their privacy policies apply once loaded.</p>
       </div>
-    </article>
-`;
+    </div>
+  `;
 
   const contactHtml = createPageHtml({
     title: 'Contact The Louisian',
-    metaDesc: 'The official student publication of Saint Louis University BEdS – Senior High Department',
-    canonical: 'https://thelouisian.netlify.app/contact/',
+    metaDesc: 'Contact The Louisian — tips, letters, corrections, privacy',
+    canonical: 'https://thelouisianprototype.netlify.app/contact/',
     bodyHtml: contactBody,
-    styles: `.prose { max-width: 68ch; margin-left: auto; margin-right: auto; }`,
-    isHomepage: false,
   });
-
   fs.writeFileSync(path.join(DIST_DIR, 'contact.html'), contactHtml);
   console.log('✅ Generated contact.html');
 
   console.log('\n📦 Site generation complete!');
   console.log('Dist folder:', DIST_DIR);
-  console.log('\nGenerated files:');
-  fs.readdirSync(DIST_DIR).forEach((f) => console.log(`  - ${f}`));
 }
 
 generateSite().catch((err) => {
