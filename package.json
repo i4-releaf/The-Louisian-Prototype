@@ -14,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "remark": "^15.0.0",
-    "remark-html": "^17.0.0",
+    "remark-html": "^16.0.1",
     "date-fns": "^3.6.0"
   }
 }
