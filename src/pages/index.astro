@@ -5,32 +5,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Louisian — Student Journalism at Saint Louis University BEdS</title>
+    <meta name="description" content="The official student publication of Saint Louis University BEdS – Senior High Department." />
+    <link rel="canonical" href="https://thelouisian.netlify.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Louisian" />
+    <meta name="twitter:card" content="summary" />
     <link rel="stylesheet" href="/global.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              navy: "#0F2342",
-              gold: "#FBBF24",
-              paper: "#FFFDF8",
-              ink: "#111827",
-              muted: "#4B5563",
-            },
-          },
-        },
-      };
-    </script>
-    <Astro:head>
-      <title>The Louisian — Student Journalism at Saint Louis University BEdS</title>
-      <meta name="description" content="The official student publication of Saint Louis University BEdS – Senior High Department." />
-      <link rel="canonical" href="https://thelouisian.netlify.app/" />
-      <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="The Louisian" />
-      <meta name="twitter:card" content="summary" />
-    </Astro:head>
   </head>
   <body class="bg-navy-800 text-paper">
     <a href="#main" class="skip-link">Skip to content</a>
@@ -72,7 +53,7 @@
         <!-- Lead package -->
         <section class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-7">
           <!-- Hero story (fallback newest) -->
-          <article class="group border rounded --radius shadow --shadow hero-group overflow-hidden">
+          <article class="group border rounded --radius overflow-hidden">
             <img
               src="/brand/hero-placeholder.jpg"
               alt="Hero story image"
@@ -185,7 +166,7 @@
             </button>
           </form>
           <p class="text-[--muted] text-xs mt-4">
-            We respect your privacy. <a href="/contact/#privacy">View our privacy policy.</a>
+            We respect your privacy. <a href="/contact/#privacy" style="color: var(--gold-400);">View our privacy policy.</a>
           </p>
         </section>
       </div>
@@ -216,7 +197,7 @@
             </li>
             <li>
               <a
-                href="https://www.instagram.com/slushsthelouisian/"
+                href="httpswww.instagram.com/slushsthelouisian/"
                 class="text-[--blue-200] hover:text-[--gold-400]"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -228,41 +209,5 @@
         </div>
       </div>
     </footer>
-
-    <style>
-      :root {
-        --font-playfair: "Playfair Display", Georgia, "Times New Roman", serif;
-      }
-      .skip-link {
-        position: absolute;
-        left: -1000px;
-        top: auto;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        transition: top 0.2s;
-      }
-      .skip-link:focus {
-        left: 0;
-        top: 0;
-        width: auto;
-        height: auto;
-        color: var(--navy-800);
-        background: var(--paper);
-        padding: 8px;
-        z-index: 100;
-      }
-      .hero-group {
-        aspect-ratio: 16/9;
-      }
-      @media (max-width: 768px) {
-        .skip-link {
-          left: auto;
-          width: auto;
-          height: auto;
-          overflow: visible;
-        }
-      }
-    </style>
   </body>
 </html>
