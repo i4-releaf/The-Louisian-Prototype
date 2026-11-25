@@ -5,9 +5,9 @@
   "type": "commonjs",
   "scripts": {
     "dev": "astro dev",
-    "build": "npx astro check && npx astro build",
-    "preview": "npx astro preview",
-    "check": "npx astro check",
+    "build": "npx --yes astro check && npx --yes astro build",
+    "preview": "npx --yes astro preview",
+    "check": "npx --yes astro check",
     "format": "prettier --write ."
   },
   "keywords": [],
