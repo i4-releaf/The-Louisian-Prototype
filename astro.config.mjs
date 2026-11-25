@@ -1,20 +1,17 @@
 import { defineConfig } from "astro/config";
-import sitemap from "@astrojs/sitemap";
+import netlify from "@astrojs/netlify-adapter";
 
 export default defineConfig({
   site: "https://thelouisian.netlify.app",
   trailingSlash: "always",
   output: "static",
-  build: { format: "directory" },
+  build: {
+    // The Netlify adapter handles the build properly
+  },
   integrations: [
-    sitemap({
-      filter: (page) =>
-        !page.includes("/search/") &&
-        !page.includes("/contact/thanks/") &&
-        !page.includes("/og/"),
+    netlify({
+      // Netlify adapter options
+      // preserveSlashes: true, // Uncomment if needed
     }),
   ],
-  markdown: {
-    shikiConfig: { theme: "github-light" },
-  },
 });
