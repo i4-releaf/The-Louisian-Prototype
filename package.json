@@ -4,21 +4,17 @@
   "description": "Static site for The Louisian student publication",
   "type": "commonjs",
   "scripts": {
-    "dev": "astro dev",
-    "build": "node node_modules/.bin/astro/bin/astro.mjs check && node node_modules/.bin/astro/bin/astro build",
-    "preview": "node node_modules/.bin/astro preview",
-    "check": "node node_modules/.bin/astro check",
-    "format": "prettier --write ."
+    "dev": "echo 'Use: npm run generate'",
+    "generate": "node scripts/generate-site.js",
+    "build": "node scripts/generate-site.js",
+    "preview": "echo 'Site generated at dist/'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@astrojs/rss": "^4.0.19",
-    "@astrojs/sitemap": "^3.7.6",
-    "@fontsource-variable/montserrat": "^5.3.0",
-    "@fontsource/playfair-display": "^5.3.0",
-    "astro": "^7.4.13",
-    "sharp": "^0.35.5"
+    "remark": "^15.0.0",
+    "remark-html": "^17.0.0",
+    "date-fns": "^3.6.0"
   }
 }
