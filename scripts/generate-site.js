@@ -414,7 +414,7 @@ async function generateSite() {
     </article>
 `;
 
-  const boardHtml = createPageHtml({
+  boardHtml = createPageHtml({
     title: 'Editorial Board',
     metaDesc: 'The official student publication of Saint Louis University BEdS – Senior High Department',
     canonical: 'https://thelouisian.netlify.app/board/',
